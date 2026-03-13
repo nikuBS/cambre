@@ -7,7 +7,7 @@ import AdminPage from './admin/AdminPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<ClientPage />} />
         <Route path="/admin/*" element={<AdminPage />} />

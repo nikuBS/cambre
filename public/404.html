@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <script>
       // GitHub Pages SPA 라우팅 처리
-      // 경로를 쿼리스트링으로 변환해서 index.html로 리다이렉트
-      var path = window.location.pathname;
+      var base = '/cambre';
+      var path = window.location.pathname.replace(base, '') || '/';
       var search = window.location.search;
       var hash = window.location.hash;
-      var redirect = '/?p=' + encodeURIComponent(path.slice(1)) + (search ? '&q=' + search.slice(1) : '') + hash;
+      var redirect = base + '/?p=' + encodeURIComponent(path.slice(1)) + (search ? '&q=' + search.slice(1) : '') + hash;
       window.location.replace(redirect);
     </script>
   </head>
