@@ -8,9 +8,11 @@
     <script>
       // GitHub Pages SPA 라우팅 복원
       (function() {
+        var base = '/cambre';
         var p = window.location.search.match(/[?&]p=([^&]+)/);
         if (p) {
-          var path = '/' + decodeURIComponent(p[1]);
+          var decodedPath = decodeURIComponent(p[1]);
+          var path = base + (decodedPath ? '/' + decodedPath : '');
           var q = window.location.search.match(/[?&]q=([^&]+)/);
           var search = q ? '?' + decodeURIComponent(q[1]) : '';
           window.history.replaceState(null, null, path + search + window.location.hash);
