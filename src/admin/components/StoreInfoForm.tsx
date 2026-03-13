@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useMenuStore } from '../../shared/store'
+import { THEMES } from '../../shared/themes'
+import type { ThemeId } from '../../shared/types'
 import DataPortability from './DataPortability'
 
 interface Toast {
@@ -8,7 +10,7 @@ interface Toast {
 }
 
 export default function StoreInfoForm() {
-  const { storeInfo, updateStoreInfo } = useMenuStore()
+  const { storeInfo, updateStoreInfo, setTheme } = useMenuStore()
   const [toasts, setToasts] = useState<Toast[]>([])
   const [toastId, setToastId] = useState(0)
 
@@ -150,6 +152,76 @@ export default function StoreInfoForm() {
             placeholder="고객에게 안내할 내용을 입력하세요."
           />
         </div>
+      </div>
+
+      {/* 테마 선택 */}
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 mt-8">메뉴판 테마</h2>
+      <div className="grid grid-cols-2 gap-3 mb-2" style={{ maxWidth: '560px' }}>
+        {THEMES.map((t) => {
+          const isActive = (storeInfo.activeTheme ?? 'classic') === t.id
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTheme(t.id as ThemeId)}
+              className="text-left rounded-xl border-2 overflow-hidden transition-all"
+              style={{
+                borderColor: isActive ? t.vars.ink : '#e5e7eb',
+                boxShadow: isActive ? `0 0 0 2px ${t.vars.ink}` : 'none',
+              }}
+            >
+              {/* 미리보기 스와치 */}
+              <div
+                className="flex items-center justify-between px-3 py-3"
+                style={{ backgroundColor: t.vars.paper }}
+              >
+                <div>
+                  <div
+                    className="text-sm font-bold leading-tight"
+                    style={{
+                      color: t.vars.ink,
+                      fontFamily: t.fontHeading,
+                    }}
+                  >
+                    {t.name}
+                  </div>
+                  <div
+                    className="text-xs mt-0.5 opacity-70"
+                    style={{ color: t.vars.sepia, fontFamily: t.fontBody }}
+                  >
+                    {t.nameEn}
+                  </div>
+                </div>
+                {/* 미니 컬러 팔레트 */}
+                <div className="flex gap-1">
+                  <span
+                    className="w-4 h-4 rounded-full border"
+                    style={{ backgroundColor: t.vars.paper, borderColor: t.vars.ink }}
+                  />
+                  <span
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: t.vars.ink }}
+                  />
+                  <span
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: t.vars.sepia }}
+                  />
+                </div>
+              </div>
+              {/* 설명 */}
+              <div className="px-3 py-2 bg-white">
+                <p className="text-xs text-gray-500 leading-relaxed">{t.description}</p>
+              </div>
+              {isActive && (
+                <div
+                  className="text-center text-xs font-semibold py-1"
+                  style={{ backgroundColor: t.vars.ink, color: t.vars.paper }}
+                >
+                  적용 중
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* 데이터 이식성 섹션 */}

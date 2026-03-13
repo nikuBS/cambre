@@ -1,3 +1,31 @@
+export type ThemeId =
+  | 'classic'
+  | 'blackwhite'
+  | 'nightExtra'
+  | 'parisian'
+  | 'redEdition'
+  | 'earlGrey'
+  | 'goldPress'
+  | 'blueSky'
+  | 'greenTea'
+  | 'modern'
+
+export interface ThemeConfig {
+  id: ThemeId
+  name: string
+  nameEn: string
+  description: string
+  vars: {
+    paper: string
+    ink: string
+    sepia: string
+    inkLight: string
+  }
+  fontHeading: string
+  fontBody: string
+  fontUrl?: string
+}
+
 export interface StoreInfo {
   name: string
   slogan: string
@@ -5,6 +33,7 @@ export interface StoreInfo {
   address: string
   instagram: string
   notice: string
+  activeTheme: ThemeId
 }
 
 export interface MenuItem {

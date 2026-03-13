@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useMenuStore } from '../shared/store'
+import { getTheme } from '../shared/themes'
 import NewspaperHeader from './components/NewspaperHeader'
 import NoticeBar from './components/NoticeBar'
 import CategoryNav from './components/CategoryNav'
@@ -8,6 +9,29 @@ import Footer from './components/Footer'
 
 export default function ClientPage() {
   const { storeInfo, categories, menuItems } = useMenuStore()
+  const theme = getTheme(storeInfo.activeTheme ?? 'classic')
+
+  // 테마 CSS 변수를 :root에 동적 적용
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--paper', theme.vars.paper)
+    root.style.setProperty('--ink', theme.vars.ink)
+    root.style.setProperty('--sepia', theme.vars.sepia)
+    root.style.setProperty('--ink-light', theme.vars.inkLight)
+  }, [theme])
+
+  // 테마 폰트 동적 로드
+  useEffect(() => {
+    const existingLink = document.getElementById('theme-font-link')
+    if (existingLink) existingLink.remove()
+    if (theme.fontUrl) {
+      const link = document.createElement('link')
+      link.id = 'theme-font-link'
+      link.rel = 'stylesheet'
+      link.href = theme.fontUrl
+      document.head.appendChild(link)
+    }
+  }, [theme.fontUrl])
 
   // isVisible: true인 카테고리만, order 순 정렬
   const visibleCategories = [...categories]

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { StoreInfo, MenuItem, Category } from './types'
+import type { StoreInfo, MenuItem, Category, ThemeId } from './types'
 import { initialStoreInfo, initialCategories, initialMenuItems } from './mockData'
 
 interface MenuStore {
@@ -10,6 +10,7 @@ interface MenuStore {
 
   // StoreInfo actions
   updateStoreInfo: (info: Partial<StoreInfo>) => void
+  setTheme: (themeId: ThemeId) => void
 
   // Category actions
   addCategory: (category: Category) => void
@@ -38,6 +39,9 @@ export const useMenuStore = create<MenuStore>()(
 
       updateStoreInfo: (info) =>
         set((state) => ({ storeInfo: { ...state.storeInfo, ...info } })),
+
+      setTheme: (themeId) =>
+        set((state) => ({ storeInfo: { ...state.storeInfo, activeTheme: themeId } })),
 
       addCategory: (category) =>
         set((state) => ({ categories: [...state.categories, category] })),

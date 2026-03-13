@@ -7,6 +7,7 @@ export const initialStoreInfo: StoreInfo = {
   address: '서울 마포구 어울마당로 130 지하 1층',
   instagram: '@cambre_bar',
   notice: '🍸 이달의 추천 칵테일: 서울의 밤 — 국산 소주베이스 스페셜 칵테일 | 단체예약 문의: 010-1234-5678 | 주차 불가 (대중교통 이용 부탁드립니다)',
+  activeTheme: 'classic',
 }
 
 export const initialCategories: Category[] = [
