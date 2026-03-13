@@ -20,6 +20,9 @@ export interface ThemeConfig {
     ink: string
     sepia: string
     inkLight: string
+    badgeNew: string   // NEW 배지 배경색
+    badgeBest: string  // BEST 배지 배경색
+    badgeText: string  // 배지 텍스트 색
   }
   fontHeading: string
   fontBody: string

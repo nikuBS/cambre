@@ -6,44 +6,72 @@ interface MenuItemCardProps {
   onOpen: (item: MenuItem) => void
 }
 
-const badgeColors: Record<string, React.CSSProperties> = {
-  NEW: {
-    backgroundColor: 'var(--ink)',
-    color: 'var(--paper)',
-  },
-  BEST: {
-    backgroundColor: 'var(--sepia)',
-    color: 'var(--paper)',
-  },
+/* 배지별 CSS 변수 매핑 */
+const badgeCssVar: Record<string, string> = {
+  NEW:  'var(--badge-new)',
+  BEST: 'var(--badge-best)',
 }
 
 export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
   const isSoldOut = item.badge === 'SOLD_OUT'
+  const stampBadge = item.badge && item.badge !== 'SOLD_OUT' ? item.badge : null
+  // 배지가 있으면 paddingLeft 22px를 확보해야 하므로 폰트를 12px로 축소
+  const rowFontSize = stampBadge ? '12px' : '13px'
 
   return (
     <div
       onClick={() => !isSoldOut && onOpen(item)}
       style={{
+        position: 'relative',
         padding: '10px 4px',
         borderBottom: '1px dashed var(--sepia)',
         cursor: isSoldOut ? 'default' : 'pointer',
-        opacity: isSoldOut ? 0.45 : 1,
+        opacity: isSoldOut ? 0.5 : 1,
         transition: 'opacity 0.15s',
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
-      {/* 이름 + 가격 라인 */}
+      {/* ── BEST / NEW 이름줄 앞 스탬프 (레이아웃 공간 미차지) ── */}
+      {stampBadge && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '6px',
+            left: '2px',
+            backgroundColor: badgeCssVar[stampBadge],
+            color: 'var(--badge-text)',
+            fontFamily: "'Noto Sans KR', sans-serif",
+            fontWeight: 900,
+            fontSize: '7px',
+            padding: '1px 3px',
+            letterSpacing: '0.08em',
+            transform: 'rotate(-12deg)',
+            transformOrigin: 'left center',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            zIndex: 2,
+            lineHeight: 1.4,
+          }}
+        >
+          {stampBadge}
+        </span>
+      )}
+
+      {/* ── 이름 + 점선 + 가격 ── */}
       <div
         style={{
           display: 'flex',
           alignItems: 'baseline',
           gap: '4px',
+          paddingLeft: stampBadge ? '22px' : '0', // 스탬프 영역 확보
         }}
       >
         <span
           style={{
             fontFamily: "'Noto Serif KR', serif",
             fontWeight: 700,
-            fontSize: '14px',
+            fontSize: rowFontSize,
             color: 'var(--ink)',
             whiteSpace: 'nowrap' as const,
             textDecoration: isSoldOut ? 'line-through' : 'none',
@@ -59,7 +87,7 @@ export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
             flex: 1,
             borderBottom: '1.5px dotted var(--sepia)',
             marginBottom: '3px',
-            minWidth: '12px',
+            minWidth: '8px',
           }}
         />
 
@@ -67,7 +95,7 @@ export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
           style={{
             fontFamily: "'Noto Sans KR', sans-serif",
             fontWeight: 700,
-            fontSize: '14px',
+            fontSize: rowFontSize,
             color: 'var(--ink)',
             whiteSpace: 'nowrap' as const,
             flexShrink: 0,
@@ -77,43 +105,7 @@ export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
         </span>
       </div>
 
-      {/* 뱃지 행 */}
-      {item.badge && item.badge !== 'SOLD_OUT' && (
-        <div style={{ marginTop: '4px', display: 'flex', gap: '4px' }}>
-          <span
-            style={{
-              ...badgeColors[item.badge],
-              fontFamily: "'Noto Sans KR', sans-serif",
-              fontWeight: 700,
-              fontSize: '10px',
-              padding: '1px 5px',
-              letterSpacing: '0.06em',
-            }}
-          >
-            {item.badge}
-          </span>
-        </div>
-      )}
-
-      {isSoldOut && (
-        <div style={{ marginTop: '4px' }}>
-          <span
-            style={{
-              backgroundColor: 'var(--ink-light)',
-              color: 'var(--paper)',
-              fontFamily: "'Noto Sans KR', sans-serif",
-              fontWeight: 700,
-              fontSize: '10px',
-              padding: '1px 5px',
-              letterSpacing: '0.06em',
-            }}
-          >
-            SOLD OUT
-          </span>
-        </div>
-      )}
-
-      {/* 설명 2줄 말줄임 */}
+      {/* ── 설명 2줄 말줄임 ── */}
       <p
         style={{
           marginTop: '4px',
@@ -130,6 +122,38 @@ export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
       >
         {item.description}
       </p>
+
+      {/* ── SOLD OUT 대각선 스탬프 오버레이 ── */}
+      {isSoldOut && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Noto Sans KR', sans-serif",
+              fontWeight: 900,
+              fontSize: '12px',
+              color: 'var(--ink)',
+              letterSpacing: '0.14em',
+              border: '2px solid var(--ink)',
+              padding: '2px 8px',
+              transform: 'rotate(-18deg)',
+              opacity: 0.5,
+              whiteSpace: 'nowrap' as const,
+              userSelect: 'none',
+            }}
+          >
+            SOLD OUT
+          </span>
+        </div>
+      )}
     </div>
   )
 }

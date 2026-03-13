@@ -11,6 +11,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#1a1a1a',
       sepia: '#8b7355',
       inkLight: '#3d3d3d',
+      badgeNew:  '#1a4870', // 딥 네이비
+      badgeBest: '#7a2010', // 테라코타
+      badgeText: '#f5e6c8',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -25,6 +28,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#000000',
       sepia: '#555555',
       inkLight: '#333333',
+      badgeNew:  '#111111', // 블랙
+      badgeBest: '#555555', // 다크 그레이
+      badgeText: '#f7f7f2',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -39,6 +45,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#d4c8a8',
       sepia: '#a08060',
       inkLight: '#b0a890',
+      badgeNew:  '#2a7080', // 틸 블루
+      badgeBest: '#8a5010', // 앰버 브라운
+      badgeText: '#f0ece0',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -53,6 +62,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#1a2456',
       sepia: '#4a5880',
       inkLight: '#2a3870',
+      badgeNew:  '#6a1a30', // 버건디
+      badgeBest: '#1a5a30', // 포레스트 그린
+      badgeText: '#f0e8d8',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -69,6 +81,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#7a0000',
       sepia: '#a03020',
       inkLight: '#8b2010',
+      badgeNew:  '#0a2060', // 딥 네이비
+      badgeBest: '#1a5a20', // 포레스트 그린
+      badgeText: '#fff5f0',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -83,6 +98,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#3d2b1f',
       sepia: '#7a5a3a',
       inkLight: '#5a3d28',
+      badgeNew:  '#1a4a50', // 딥 틸
+      badgeBest: '#6a1020', // 와인 레드
+      badgeText: '#e8d5b7',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -97,6 +115,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#c9a84c',
       sepia: '#a07830',
       inkLight: '#b09040',
+      badgeNew:  '#1a3a70', // 코발트 블루
+      badgeBest: '#1a6040', // 에메랄드 그린
+      badgeText: '#f0e8c0',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -111,6 +132,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#1a2d4a',
       sepia: '#3a5a7a',
       inkLight: '#2a4060',
+      badgeNew:  '#1a5a28', // 포레스트 그린
+      badgeBest: '#7a1a28', // 버건디
+      badgeText: '#e8f0f8',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -125,6 +149,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#1a3320',
       sepia: '#3a6040',
       inkLight: '#2a4a30',
+      badgeNew:  '#1a2a60', // 딥 네이비
+      badgeBest: '#6a1a18', // 다크 레드
+      badgeText: '#e8f0e4',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",
@@ -139,6 +166,9 @@ export const THEMES: ThemeConfig[] = [
       ink: '#111111',
       sepia: '#666666',
       inkLight: '#444444',
+      badgeNew:  '#1a3060', // 딥 블루
+      badgeBest: '#8a1a1a', // 다크 레드
+      badgeText: '#ffffff',
     },
     fontHeading: "'Noto Serif KR', serif",
     fontBody: "'Noto Sans KR', sans-serif",

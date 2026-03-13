@@ -14,10 +14,13 @@ export default function ClientPage() {
   // 테마 CSS 변수를 :root에 동적 적용
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--paper', theme.vars.paper)
-    root.style.setProperty('--ink', theme.vars.ink)
-    root.style.setProperty('--sepia', theme.vars.sepia)
-    root.style.setProperty('--ink-light', theme.vars.inkLight)
+    root.style.setProperty('--paper',      theme.vars.paper)
+    root.style.setProperty('--ink',        theme.vars.ink)
+    root.style.setProperty('--sepia',      theme.vars.sepia)
+    root.style.setProperty('--ink-light',  theme.vars.inkLight)
+    root.style.setProperty('--badge-new',  theme.vars.badgeNew)
+    root.style.setProperty('--badge-best', theme.vars.badgeBest)
+    root.style.setProperty('--badge-text', theme.vars.badgeText)
   }, [theme])
 
   // 테마 폰트 동적 로드
