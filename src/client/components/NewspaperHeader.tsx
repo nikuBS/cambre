@@ -87,6 +87,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Noto Sans KR', sans-serif",
     color: 'var(--ink-light)',
     letterSpacing: '0.05em',
+    wordBreak: 'keep-all' as const,
+    lineHeight: 1.7,
   },
 }
 

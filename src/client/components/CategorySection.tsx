@@ -172,7 +172,7 @@ export default function CategorySection({ category, menuItems }: CategorySection
             padding: '4px 12px 12px',
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '0 20px',
+            gap: '0 8px',
           }}
         >
           {visibleItems.length === 0 ? (
