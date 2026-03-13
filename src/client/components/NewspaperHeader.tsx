@@ -1,4 +1,3 @@
-import React from 'react'
 import type { StoreInfo } from '../../shared/types'
 
 interface NewspaperHeaderProps {
