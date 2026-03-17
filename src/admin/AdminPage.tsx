@@ -5,7 +5,7 @@ import MenuManagement from './components/MenuManagement'
 import CategoryManagement from './components/CategoryManagement'
 import StoreInfoForm from './components/StoreInfoForm'
 
-const ADMIN_PASSWORD = '01094925503'
+const ADMIN_PASSWORDS = ['01094925503', '01063002929']
 
 function PreviewPage() {
   return (
@@ -53,7 +53,7 @@ export default function AdminPage() {
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (password === ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORDS.includes(password)) {
       setIsAuthenticated(true)
       setErrorMessage('')
       return

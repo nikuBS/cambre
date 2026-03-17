@@ -184,31 +184,25 @@ function MenuForm({ categories, editingItem, onClose }: MenuFormProps) {
               노출 (고객 페이지에 표시)
             </label>
           </div>
-        </form>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault()
-              const syntheticEvent = {
-                preventDefault: () => {},
-              } as React.FormEvent
-              handleSubmit(syntheticEvent)
-            }}
-            className="flex-1 py-2 rounded-lg text-sm text-white font-medium transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#1a1a1a' }}
-          >
-            {editingItem ? '수정 저장' : '추가'}
-          </button>
-        </div>
+          {/* 버튼 - form 안에 포함해 모바일 키보드에 가려지지 않도록 */}
+          <div className="flex gap-3 pt-2 pb-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-3 rounded-lg text-sm text-white font-medium transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#1a1a1a' }}
+            >
+              {editingItem ? '수정 저장' : '추가'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
@@ -338,7 +332,11 @@ export default function MenuManagement() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
