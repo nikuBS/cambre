@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { StoreInfo, MenuItem, Category, ThemeId } from './types'
 import { initialStoreInfo, initialCategories, initialMenuItems } from './mockData'
+import { fetchServerData, saveToServer, checkServerAvailable } from './api'
 
 interface MenuStore {
   storeInfo: StoreInfo
@@ -118,3 +119,42 @@ export const useMenuStore = create<MenuStore>()(
     }
   )
 )
+
+// ─── 서버 동기화 ───────────────────────────────────────────────
+// 상태 변경 시 data/menu.json에 자동 저장 (디바운스 300ms)
+let _syncTimer: ReturnType<typeof setTimeout> | null = null
+let _isSyncing = false
+
+async function syncToServer() {
+  if (_isSyncing) return
+  _isSyncing = true
+  try {
+    const { storeInfo, categories, menuItems } = useMenuStore.getState()
+    await saveToServer({ storeInfo, categories, menuItems })
+  } finally {
+    _isSyncing = false
+  }
+}
+
+useMenuStore.subscribe(() => {
+  if (_isSyncing) return
+  if (_syncTimer) clearTimeout(_syncTimer)
+  _syncTimer = setTimeout(syncToServer, 300)
+})
+
+/** 앱 시작 시 서버 데이터로 초기화 (서버가 실행 중일 때만) */
+export async function initFromServer(): Promise<boolean> {
+  const available = await checkServerAvailable()
+  if (!available) return false
+
+  const data = await fetchServerData()
+  if (!data) return false
+
+  _isSyncing = true
+  try {
+    useMenuStore.getState().importData(JSON.stringify(data))
+  } finally {
+    _isSyncing = false
+  }
+  return true
+}
