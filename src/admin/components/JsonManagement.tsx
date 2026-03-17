@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useMenuStore } from '../../shared/store'
+import { useMenuStore, detectBackend } from '../../shared/store'
+import type { BackendType } from '../../shared/api'
 
 type MessageType = 'success' | 'error' | null
 
@@ -9,6 +10,7 @@ export default function JsonManagement() {
   const [originalJson, setOriginalJson] = useState('')
   const [message, setMessage] = useState<{ type: MessageType; text: string } | null>(null)
   const [isModified, setIsModified] = useState(false)
+  const [backend, setBackend] = useState<BackendType | null>(null)
 
   const loadCurrentData = () => {
     const json = exportData()
@@ -19,11 +21,12 @@ export default function JsonManagement() {
 
   useEffect(() => {
     loadCurrentData()
+    detectBackend().then(setBackend)
   }, [])
 
   const showMessage = (type: MessageType, text: string) => {
     setMessage({ type, text })
-    setTimeout(() => setMessage(null), 3000)
+    setTimeout(() => setMessage(null), 4000)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -34,13 +37,13 @@ export default function JsonManagement() {
 
   const handleApply = () => {
     try {
-      JSON.parse(jsonText) // 유효성 검사
+      JSON.parse(jsonText)
       importData(jsonText)
       const updated = exportData()
       setOriginalJson(updated)
       setJsonText(updated)
       setIsModified(false)
-      showMessage('success', 'JSON이 성공적으로 적용되었습니다.')
+      showMessage('success', backend === 'jsonbin' ? 'JSONbin에 저장되었습니다.' : backend === 'local' ? '로컬 서버에 저장되었습니다.' : '로컬에 적용되었습니다.')
     } catch {
       showMessage('error', 'JSON 형식이 올바르지 않습니다. 수정 후 다시 시도하세요.')
     }
@@ -53,17 +56,15 @@ export default function JsonManagement() {
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(jsonText).then(() => {
-      showMessage('success', '클립보드에 복사되었습니다.')
-    }).catch(() => {
-      showMessage('error', '복사에 실패했습니다.')
-    })
+    navigator.clipboard.writeText(jsonText).then(
+      () => showMessage('success', '클립보드에 복사되었습니다.'),
+      () => showMessage('error', '복사에 실패했습니다.')
+    )
   }
 
   const handleFormat = () => {
     try {
-      const parsed = JSON.parse(jsonText)
-      const formatted = JSON.stringify(parsed, null, 2)
+      const formatted = JSON.stringify(JSON.parse(jsonText), null, 2)
       setJsonText(formatted)
       setIsModified(formatted !== originalJson)
     } catch {
@@ -89,66 +90,90 @@ export default function JsonManagement() {
 
   const lineCount = jsonText.split('\n').length
 
+  const backendBadge = {
+    local: { label: '🟢 로컬 서버', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    jsonbin: { label: '🟣 JSONbin.io', cls: 'bg-purple-50 text-purple-700 border-purple-200' },
+    localStorage: { label: '🟡 localStorage', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  }
+  const badge = backend ? backendBadge[backend] : null
+
   return (
     <div className="max-w-4xl mx-auto space-y-4">
       {/* 헤더 */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-base font-semibold text-gray-800">JSON 데이터 관리</h2>
           <p className="text-xs text-gray-400 mt-0.5">
             메뉴·카테고리·매장정보를 JSON으로 직접 편집하고 적용할 수 있습니다.
           </p>
         </div>
-
-        {isModified && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            미적용 변경사항 있음
-          </span>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {badge && (
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${badge.cls}`}>
+              {badge.label}
+            </span>
+          )}
+          {isModified && (
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              ● 미적용 변경사항
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* JSONbin 미설정 안내 */}
+      {backend === 'localStorage' && (
+        <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-4 text-sm">
+          <p className="font-semibold text-purple-800 mb-2">📦 JSONbin.io 설정하면 GitHub Pages에서도 실시간 동기화됩니다</p>
+          <ol className="text-xs text-purple-700 space-y-1 leading-5 list-decimal list-inside">
+            <li><a href="https://jsonbin.io" target="_blank" rel="noreferrer" className="underline">jsonbin.io</a>에서 무료 계정 생성</li>
+            <li>API Keys 메뉴에서 <strong>Master Key</strong> 복사</li>
+            <li>Bins → Create Bin → 아래 초기 데이터 붙여넣기 후 저장 → Bin ID 복사</li>
+            <li>프로젝트 루트에 <code className="bg-purple-100 px-1 rounded">.env.local</code> 파일 생성 후 아래 내용 입력:</li>
+          </ol>
+          <pre className="mt-2 bg-purple-100 rounded-lg px-3 py-2 text-xs text-purple-900 font-mono overflow-x-auto">
+{`VITE_JSONBIN_KEY=${'$'}{Master Key}
+VITE_JSONBIN_ID=${'$'}{Bin ID}`}
+          </pre>
+          <p className="text-xs text-purple-600 mt-2">GitHub Pages 배포 시에는 레포 Settings → Secrets에 동일하게 추가하세요.</p>
+        </div>
+      )}
+
+      {/* JSONbin 연결됨 안내 */}
+      {backend === 'jsonbin' && (
+        <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-xs text-purple-700 flex items-center gap-2">
+          <span>✓</span>
+          <span>JSONbin.io 연결됨 — 변경사항이 즉시 저장되어 모든 기기에서 동기화됩니다.</span>
+        </div>
+      )}
+
+      {/* 로컬 서버 연결됨 안내 */}
+      {backend === 'local' && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-700 flex items-center gap-2">
+          <span>✓</span>
+          <span>로컬 서버 연결됨 — 변경사항이 <code className="bg-emerald-100 px-1 rounded">data/menu.json</code>에 자동 저장됩니다.</span>
+        </div>
+      )}
 
       {/* 액션 버튼 바 */}
       <div className="flex flex-wrap gap-2">
-        <button
-          onClick={handleFormat}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <span>{ }</span>
-          <span>정렬</span>
+        <button onClick={handleFormat} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors">
+          <span>{'{}'}</span><span>정렬</span>
         </button>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <span>⎘</span>
-          <span>복사</span>
+        <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors">
+          <span>⎘</span><span>복사</span>
         </button>
-        <button
-          onClick={handleDownload}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <span>↓</span>
-          <span>다운로드</span>
+        <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors">
+          <span>↓</span><span>다운로드</span>
         </button>
-        <button
-          onClick={loadCurrentData}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <span>↺</span>
-          <span>새로고침</span>
+        <button onClick={loadCurrentData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors">
+          <span>↺</span><span>새로고침</span>
         </button>
       </div>
 
       {/* 메시지 */}
       {message && (
-        <div
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-600 border border-red-200'
-          }`}
-        >
+        <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
           <span>{message.type === 'success' ? '✓' : '✕'}</span>
           <span>{message.text}</span>
         </div>
@@ -156,25 +181,20 @@ export default function JsonManagement() {
 
       {/* JSON 에디터 */}
       <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        {/* 에디터 헤더 */}
         <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
           <span className="text-xs text-gray-400 font-mono">cambre-data.json</span>
           <span className="text-xs text-gray-500">{lineCount}줄</span>
         </div>
-
-        {/* 텍스트 에디터 */}
-        <div className="relative">
-          <textarea
-            value={jsonText}
-            onChange={handleChange}
-            spellCheck={false}
-            className="w-full h-[60vh] min-h-[400px] px-4 py-3 bg-gray-900 text-green-400 font-mono text-xs leading-5 resize-none outline-none placeholder:text-gray-600"
-            style={{ tabSize: 2 }}
-          />
-        </div>
+        <textarea
+          value={jsonText}
+          onChange={handleChange}
+          spellCheck={false}
+          className="w-full h-[55vh] min-h-[360px] px-4 py-3 bg-gray-900 text-green-400 font-mono text-xs leading-5 resize-none outline-none"
+          style={{ tabSize: 2 }}
+        />
       </div>
 
-      {/* 하단 적용 버튼 */}
+      {/* 하단 버튼 */}
       <div className="flex items-center justify-between pt-1 pb-4">
         <button
           onClick={handleReset}

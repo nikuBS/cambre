@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { StoreInfo, MenuItem, Category, ThemeId } from './types'
 import { initialStoreInfo, initialCategories, initialMenuItems } from './mockData'
-import { fetchServerData, saveToServer, checkServerAvailable } from './api'
+import { fetchData, saveData, detectBackend } from './api'
 
 interface MenuStore {
   storeInfo: StoreInfo
@@ -120,17 +120,20 @@ export const useMenuStore = create<MenuStore>()(
   )
 )
 
-// ─── 서버 동기화 ───────────────────────────────────────────────
-// 상태 변경 시 data/menu.json에 자동 저장 (디바운스 300ms)
+// ─── 백엔드 자동 동기화 ───────────────────────────────────────
+// 상태 변경 시 로컬서버 or JSONbin에 자동 저장 (debounce 300ms)
 let _syncTimer: ReturnType<typeof setTimeout> | null = null
 let _isSyncing = false
 
-async function syncToServer() {
+async function syncToBackend() {
   if (_isSyncing) return
+  const backend = await detectBackend()
+  if (backend === 'localStorage') return // localStorage는 persist가 처리
+
   _isSyncing = true
   try {
     const { storeInfo, categories, menuItems } = useMenuStore.getState()
-    await saveToServer({ storeInfo, categories, menuItems })
+    await saveData({ storeInfo, categories, menuItems })
   } finally {
     _isSyncing = false
   }
@@ -139,15 +142,18 @@ async function syncToServer() {
 useMenuStore.subscribe(() => {
   if (_isSyncing) return
   if (_syncTimer) clearTimeout(_syncTimer)
-  _syncTimer = setTimeout(syncToServer, 300)
+  _syncTimer = setTimeout(syncToBackend, 300)
 })
 
-/** 앱 시작 시 서버 데이터로 초기화 (서버가 실행 중일 때만) */
+// ─── 앱 시작 시 초기화 ────────────────────────────────────────
+/**
+ * 앱 시작 시 데이터 소스 우선순위:
+ * 1. 로컬 서버 (npm run server) → data/menu.json
+ * 2. JSONbin.io → 클라우드 JSON (GitHub Pages에서도 동작)
+ * 3. localStorage (폴백)
+ */
 export async function initFromServer(): Promise<boolean> {
-  const available = await checkServerAvailable()
-  if (!available) return false
-
-  const data = await fetchServerData()
+  const data = await fetchData()
   if (!data) return false
 
   _isSyncing = true
@@ -158,3 +164,5 @@ export async function initFromServer(): Promise<boolean> {
   }
   return true
 }
+
+export { detectBackend }
