@@ -15,15 +15,15 @@ let _detectedBackend: BackendType | null = null
 export async function detectBackend(): Promise<BackendType> {
   if (_detectedBackend !== null) return _detectedBackend
 
-  // 1순위: 로컬 서버 (npm run server)
+  // 1순위: 로컬 서버 (npm run server) — /api/ping 으로만 판단
   try {
-    const res = await fetch('/api/data', { signal: AbortSignal.timeout(1200) })
-    if (res.ok || res.status === 404) {
+    const res = await fetch('/api/ping', { signal: AbortSignal.timeout(1200) })
+    if (res.ok) {
       _detectedBackend = 'local'
       return 'local'
     }
   } catch {
-    // 로컬 서버 없음
+    // 로컬 서버 없음 → GitHub Pages의 404와 구분됨
   }
 
   // 2순위: JSONbin.io (환경변수 설정된 경우)

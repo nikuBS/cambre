@@ -19,6 +19,11 @@ app.use((req, res, next) => {
   next()
 })
 
+// GET /api/ping — 로컬 서버 헬스체크
+app.get('/api/ping', (req, res) => {
+  res.json({ ok: true })
+})
+
 // GET /api/data — 메뉴 데이터 읽기
 app.get('/api/data', async (req, res) => {
   try {
