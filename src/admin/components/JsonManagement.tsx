@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMenuStore, detectBackend } from '../../shared/store'
-import type { BackendType } from '../../shared/api'
+import { testJsonbinConnection, resetBackendCache, type BackendType, type DiagResult } from '../../shared/api'
 
 type MessageType = 'success' | 'error' | null
 
@@ -11,6 +11,8 @@ export default function JsonManagement() {
   const [message, setMessage] = useState<{ type: MessageType; text: string } | null>(null)
   const [isModified, setIsModified] = useState(false)
   const [backend, setBackend] = useState<BackendType | null>(null)
+  const [diagResult, setDiagResult] = useState<DiagResult | null>(null)
+  const [isTesting, setIsTesting] = useState(false)
 
   const loadCurrentData = () => {
     const json = exportData()
@@ -23,6 +25,17 @@ export default function JsonManagement() {
     loadCurrentData()
     detectBackend().then(setBackend)
   }, [])
+
+  const handleTestConnection = async () => {
+    setIsTesting(true)
+    setDiagResult(null)
+    resetBackendCache()
+    const result = await testJsonbinConnection()
+    setDiagResult(result)
+    const detected = await detectBackend()
+    setBackend(detected)
+    setIsTesting(false)
+  }
 
   const showMessage = (type: MessageType, text: string) => {
     setMessage({ type, text })
@@ -123,19 +136,46 @@ export default function JsonManagement() {
 
       {/* JSONbin 미설정 안내 */}
       {backend === 'localStorage' && (
-        <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-4 text-sm">
-          <p className="font-semibold text-purple-800 mb-2">📦 JSONbin.io 설정하면 GitHub Pages에서도 실시간 동기화됩니다</p>
-          <ol className="text-xs text-purple-700 space-y-1 leading-5 list-decimal list-inside">
-            <li><a href="https://jsonbin.io" target="_blank" rel="noreferrer" className="underline">jsonbin.io</a>에서 무료 계정 생성</li>
-            <li>API Keys 메뉴에서 <strong>Master Key</strong> 복사</li>
-            <li>Bins → Create Bin → 아래 초기 데이터 붙여넣기 후 저장 → Bin ID 복사</li>
-            <li>프로젝트 루트에 <code className="bg-purple-100 px-1 rounded">.env.local</code> 파일 생성 후 아래 내용 입력:</li>
-          </ol>
-          <pre className="mt-2 bg-purple-100 rounded-lg px-3 py-2 text-xs text-purple-900 font-mono overflow-x-auto">
-{`VITE_JSONBIN_KEY=${'$'}{Master Key}
-VITE_JSONBIN_ID=${'$'}{Bin ID}`}
-          </pre>
-          <p className="text-xs text-purple-600 mt-2">GitHub Pages 배포 시에는 레포 Settings → Secrets에 동일하게 추가하세요.</p>
+        <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-4 text-sm space-y-3">
+          <div>
+            <p className="font-semibold text-purple-800 mb-2">📦 JSONbin.io 설정하면 GitHub Pages에서도 실시간 동기화됩니다</p>
+            <ol className="text-xs text-purple-700 space-y-1 leading-5 list-decimal list-inside">
+              <li>프로젝트 루트의 <code className="bg-purple-100 px-1 rounded">.env.local</code> 파일에 아래 값을 입력하고 값은 <strong>반드시 따옴표로 감싸세요:</strong></li>
+            </ol>
+            <pre className="mt-2 bg-purple-100 rounded-lg px-3 py-2 text-xs text-purple-900 font-mono overflow-x-auto">{`VITE_JSONBIN_KEY="your_key_here"
+VITE_JSONBIN_ID="your_bin_id_here"`}</pre>
+            <p className="text-xs text-purple-600 mt-2">GitHub Pages 배포 시에는 레포 Settings → Secrets and variables → Actions에도 동일하게 추가하세요.</p>
+          </div>
+
+          {/* 연결 테스트 버튼 */}
+          <div className="pt-1 border-t border-purple-200">
+            <button
+              onClick={handleTestConnection}
+              disabled={isTesting}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors disabled:opacity-60"
+            >
+              {isTesting ? (
+                <><span className="inline-block w-3 h-3 border-2 border-purple-400 border-t-purple-800 rounded-full animate-spin"></span><span>테스트 중...</span></>
+              ) : (
+                <><span>🔍</span><span>JSONbin 연결 테스트</span></>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 진단 결과 */}
+      {diagResult && (
+        <div className={`rounded-xl border px-4 py-3 text-xs space-y-1.5 ${diagResult.saveOk ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+          <p className="font-semibold text-sm">{diagResult.saveOk ? '✅ JSONbin 연결 성공!' : '❌ JSONbin 연결 실패'}</p>
+          <div className="space-y-0.5 font-mono">
+            <p>{diagResult.hasKey ? '✓' : '✗'} VITE_JSONBIN_KEY {diagResult.hasKey ? '설정됨' : '없음'}</p>
+            <p>{diagResult.hasId ? '✓' : '✗'} VITE_JSONBIN_ID {diagResult.hasId ? '설정됨' : '없음'}</p>
+            <p>{diagResult.fetchOk ? '✓' : '✗'} 읽기(GET) {diagResult.fetchOk ? '성공' : '실패'}</p>
+            <p>{diagResult.saveOk ? '✓' : '✗'} 쓰기(PUT) {diagResult.saveOk ? '성공' : '실패'}</p>
+            {diagResult.error && <p className="text-red-600 mt-1">오류: {diagResult.error}</p>}
+          </div>
+          {diagResult.saveOk && <p className="text-green-600">이제 페이지를 새로고침하면 JSONbin 모드로 전환됩니다.</p>}
         </div>
       )}
 

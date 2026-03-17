@@ -124,6 +124,51 @@ export async function saveData(data: MenuData): Promise<boolean> {
   return false
 }
 
+// ─── 진단 ─────────────────────────────────────────────────────
+export interface DiagResult {
+  hasKey: boolean
+  hasId: boolean
+  fetchOk: boolean
+  saveOk: boolean
+  error?: string
+}
+
+export async function testJsonbinConnection(): Promise<DiagResult> {
+  const hasKey = !!(import.meta.env.VITE_JSONBIN_KEY)
+  const hasId = !!(import.meta.env.VITE_JSONBIN_ID)
+
+  if (!hasKey || !hasId) {
+    return { hasKey, hasId, fetchOk: false, saveOk: false, error: '환경변수 미설정' }
+  }
+
+  // 읽기 테스트
+  let fetchOk = false
+  try {
+    const r = await fetch(`${JSONBIN_BASE}/${import.meta.env.VITE_JSONBIN_ID}/latest`, {
+      headers: jsonbinHeaders(),
+      signal: AbortSignal.timeout(5000),
+    })
+    fetchOk = r.ok
+    if (!r.ok) return { hasKey, hasId, fetchOk, saveOk: false, error: `읽기 실패: HTTP ${r.status}` }
+  } catch (e) {
+    return { hasKey, hasId, fetchOk, saveOk: false, error: `읽기 오류: ${String(e)}` }
+  }
+
+  // 쓰기 테스트 (현재 데이터 그대로 PUT)
+  let saveOk = false
+  try {
+    const current = await fetchJsonbinData()
+    if (current) {
+      saveOk = await saveJsonbinData(current)
+      if (!saveOk) return { hasKey, hasId, fetchOk, saveOk, error: '쓰기 실패 (HTTP 오류)' }
+    }
+  } catch (e) {
+    return { hasKey, hasId, fetchOk, saveOk, error: `쓰기 오류: ${String(e)}` }
+  }
+
+  return { hasKey, hasId, fetchOk, saveOk }
+}
+
 // ─── 하위 호환 ────────────────────────────────────────────────
 export const checkServerAvailable = async () => (await detectBackend()) === 'local'
 export const fetchServerData = fetchLocalData
