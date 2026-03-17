@@ -4,6 +4,7 @@ import AdminLayout from './components/AdminLayout'
 import MenuManagement from './components/MenuManagement'
 import CategoryManagement from './components/CategoryManagement'
 import StoreInfoForm from './components/StoreInfoForm'
+import JsonManagement from './components/JsonManagement'
 
 const ADMIN_PASSWORDS = ['01094925503', '01063002929']
 
@@ -159,6 +160,7 @@ export default function AdminPage() {
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="store" element={<StoreInfoForm />} />
         <Route path="preview" element={<PreviewPage />} />
+        <Route path="json" element={<JsonManagement />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </AdminLayout>

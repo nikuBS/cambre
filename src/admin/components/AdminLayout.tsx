@@ -9,6 +9,7 @@ const navItems = [
   { to: '/admin/categories', label: '카테고리관리', icon: '◈', end: false },
   { to: '/admin/store', label: '매장정보', icon: '⊙', end: false },
   { to: '/admin/preview', label: '미리보기', icon: '⊡', end: false },
+  { to: '/admin/json', label: 'JSON관리', icon: '{ }', end: false },
 ]
 
 const pageTitles: Record<string, string> = {
@@ -16,6 +17,7 @@ const pageTitles: Record<string, string> = {
   '/admin/categories': '카테고리관리',
   '/admin/store': '매장정보',
   '/admin/preview': '미리보기',
+  '/admin/json': 'JSON 관리',
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
