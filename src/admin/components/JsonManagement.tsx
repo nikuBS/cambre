@@ -167,7 +167,7 @@ VITE_JSONBIN_ID="your_bin_id_here"`}</pre>
       {/* 진단 결과 */}
       {diagResult && (
         <div className={`rounded-xl border px-4 py-3 text-xs space-y-1.5 ${diagResult.saveOk ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-          <p className="font-semibold text-sm">{diagResult.saveOk ? '✅ JSONbin 연결 성공!' : '❌ JSONbin 연결 실패'}</p>
+          <p className="font-semibold text-sm">{diagResult.saveOk ? '✅ JSONbin 연결 성공!!' : '❌ JSONbin 연결 실패'}</p>
           <div className="space-y-0.5 font-mono">
             <p>{diagResult.hasKey ? '✓' : '✗'} VITE_JSONBIN_KEY {diagResult.hasKey ? '설정됨' : '없음'}</p>
             <p>{diagResult.hasId ? '✓' : '✗'} VITE_JSONBIN_ID {diagResult.hasId ? '설정됨' : '없음'}</p>
